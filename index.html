@@ -1,1 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>🐳 DOCKER • NGINX • APACHE — Simple Study Guide</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      background: linear-gradient(135deg, #0a0f1a 0%, #0a1a2a 50%, #0a0f1a 100%);
+      font-family: 'Courier New', 'Fira Code', monospace;
+      padding: 20px;
+      min-height: 100vh;
+      color: #00e5ff;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(8, 20, 30, 0.85);
+      border: 2px solid #00e5ff;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), inset 0 0 20px rgba(0, 229, 255, 0.05);
+      padding: 25px;
+      backdrop-filter: blur(2px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #00e5ff;
+      padding-bottom: 20px;
+    }
+
+    .title {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #00e5ff;
+      text-shadow: 0 0 10px #00e5ff, 0 0 5px #0088aa;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 0.7rem;
+      color: #88ddff;
+    }
+
+    .glowing-line {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00e5ff, #ff00cc, #00e5ff, transparent);
+      margin: 15px 0;
+    }
+
+    .section {
+      background: rgba(10, 25, 35, 0.7);
+      border-left: 4px solid #00e5ff;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 25px;
+      transition: all 0.3s;
+    }
+
+    .section:hover {
+      border-left-color: #ff00cc;
+      box-shadow: -5px 0 15px rgba(255, 0, 204, 0.2);
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ffcc00;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px dashed #00e5ff;
+      padding-bottom: 8px;
+    }
+
+    .section-title .icon {
+      font-size: 1.5rem;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    @media (max-width: 800px) {
+      .card-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 500px) {
+      .card-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: #0a1a2a;
+      border: 1px solid #00e5ff;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: #ffcc00;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 20px rgba(0, 229, 255, 0.15);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #ffcc00;
+      margin-bottom: 5px;
+    }
+
+    .card-desc {
+      font-size: 0.6rem;
+      color: #88ddff;
+      line-height: 1.5;
+    }
+
+    .code-block {
+      background: #0a0f1a;
+      border: 1px solid #00e5ff;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.65rem;
+      color: #00e5ff;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      margin: 10px 0;
+    }
+
+    .command-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .command-list li {
+      padding: 6px 0;
+      border-bottom: 1px solid #00e5ff20;
+      display: flex;
+      gap: 10px;
+      font-size: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .command-cmd {
+      color: #ffcc00;
+      font-weight: bold;
+      min-width: 180px;
+    }
+
+    .command-desc {
+      color: #88ddff;
+    }
+
+    .highlight {
+      color: #ffcc00;
+      font-weight: bold;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #00e5ff20;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.5rem;
+      color: #00e5ff;
+      border: 1px solid #00e5ff;
+      margin: 2px;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.65rem;
+      margin: 10px 0;
+    }
+
+    .comparison-table th {
+      background: #00e5ff20;
+      border: 1px solid #00e5ff;
+      padding: 8px;
+      text-align: left;
+      color: #ffcc00;
+    }
+
+    .comparison-table td {
+      border: 1px solid #00e5ff40;
+      padding: 8px;
+      color: #ccf0ff;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid #00e5ff;
+      margin-top: 20px;
+      font-size: 0.55rem;
+      color: #88ddff;
+    }
+
+    .support-links {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .support-link {
+      color: #00e5ff;
+      text-decoration: none;
+      border: 1px solid #00e5ff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.55rem;
+      transition: all 0.2s;
+    }
+
+    .support-link:hover {
+      background: #00e5ff;
+      color: #0a0f1a;
+    }
+
+    .blink {
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .quiz-btn {
+      background: #0a2a3a;
+      border: 1px solid #00e5ff;
+      color: #00e5ff;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.6rem;
+    }
+
+    .quiz-btn:hover {
+      background: #00e5ff;
+      color: #0a0f1a;
+    }
+
+    .quiz-answer {
+      display: none;
+      color: #00ff66;
+      font-size: 0.6rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="title">🐳 DOCKER • NGINX • APACHE</div>
+    <div class="subtitle">Simple Study Guide — No Jargon — Just Clear Examples</div>
+    <div class="glowing-line"></div>
+  </div>
+
+  <!-- ========== SECTION 1: DOCKER ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🐳</span> DOCKER — What Is It?
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">What is Docker?</div>
+        <div class="card-desc">A <strong>container</strong> is like a <strong>portable box</strong> that holds your app + everything it needs to run. It works the same on any computer.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Image vs Container</div>
+        <div class="card-desc"><strong>Image</strong> = Blueprint / Recipe<br><strong>Container</strong> = A running copy of that blueprint</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📁</div>
+        <div class="card-title">Dockerfile</div>
+        <div class="card-desc">A <strong>recipe file</strong> that tells Docker how to build your image. You write it, Docker follows it.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <strong>📝 Example Dockerfile:</strong>
+      FROM nginx:alpine          # Start with a lightweight web server
+      COPY index.html /usr/share/nginx/html/   # Copy your file
+      EXPOSE 80                  # Tell Docker to use port 80
+      CMD ["nginx", "-g", "daemon off;"]  # Start the web server
+    </div>
+
+    <div class="code-block">
+      <strong>⚡ Common Docker Commands:</strong>
+      docker build -t my-app .          # Build an image from Dockerfile
+      docker run -d -p 8080:80 my-app   # Run a container, map port 8080→80
+      docker ps                         # List running containers
+      docker stop my-container          # Stop a running container
+      docker rm my-container            # Remove a stopped container
+      docker images                     # List all images
+      docker rmi my-image               # Remove an image
+    </div>
+  </div>
+
+  <!-- ========== SECTION 2: NGINX ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🦈</span> NGINX — What Is It?
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">What is Nginx?</div>
+        <div class="card-desc">A <strong>web server</strong> that delivers your website files to visitors. It's fast, lightweight, and handles many connections at once.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Why Use Nginx?</div>
+        <div class="card-desc"><strong>Fast</strong> — handles thousands of connections<br><strong>Lightweight</strong> — uses very little memory<br><strong>Reverse Proxy</strong> — can route traffic to other services</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📁</div>
+        <div class="card-title">Common Uses</div>
+        <div class="card-desc">• Serving static websites (HTML, CSS, JS)<br>• Load balancing<br>• SSL/TLS termination (HTTPS)<br>• Reverse proxy for APIs</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <strong>📝 Simple Nginx Config (nginx.conf):</strong>
+      server {
+          listen 80;
+          server_name mysite.com;
+          root /var/www/html;
+          index index.html;
+      }
+    </div>
+
+    <div class="code-block">
+      <strong>⚡ Common Nginx Commands:</strong>
+      sudo systemctl start nginx      # Start Nginx
+      sudo systemctl stop nginx       # Stop Nginx
+      sudo systemctl restart nginx    # Restart Nginx
+      sudo nginx -t                   # Test configuration
+      sudo nginx -s reload            # Reload without restarting
+      sudo tail -f /var/log/nginx/access.log  # View access logs
+    </div>
+  </div>
+
+  <!-- ========== SECTION 3: APACHE ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🦁</span> APACHE — What Is It?
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">What is Apache?</div>
+        <div class="card-desc">The <strong>most popular</strong> web server. It's been around since 1995 and powers millions of websites. Like Nginx, it delivers web pages to visitors.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Nginx vs Apache</div>
+        <div class="card-desc"><strong>Apache</strong> = Older, more features, uses more memory<br><strong>Nginx</strong> = Newer, faster, uses less memory</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📁</div>
+        <div class="card-title">Common Uses</div>
+        <div class="card-desc">• PHP hosting (WordPress)<br>• .htaccess support<br>• CGI / Perl scripts<br>• Legacy applications</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <strong>📝 Simple Apache Config (000-default.conf):</strong>
+      &lt;VirtualHost *:80&gt;
+          ServerName mysite.com
+          DocumentRoot /var/www/html
+          &lt;Directory /var/www/html&gt;
+              Options Indexes FollowSymLinks
+              AllowOverride All
+          &lt;/Directory&gt;
+      &lt;/VirtualHost&gt;
+    </div>
+
+    <div class="code-block">
+      <strong>⚡ Common Apache Commands:</strong>
+      sudo systemctl start apache2      # Start Apache
+      sudo systemctl stop apache2       # Stop Apache
+      sudo systemctl restart apache2    # Restart Apache
+      sudo apache2ctl configtest        # Test configuration
+      sudo tail -f /var/log/apache2/access.log  # View access logs
+    </div>
+  </div>
+
+  <!-- ========== SECTION 4: COMPARISON TABLE ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">⚖️</span> DOCKER + NGINX + APACHE — Comparison
+    </div>
+    <table class="comparison-table">
+      <tr>
+        <th>Feature</th>
+        <th>🐳 Docker</th>
+        <th>🦈 Nginx</th>
+        <th>🦁 Apache</th>
+      </tr>
+      <tr>
+        <td><strong>What is it?</strong></td>
+        <td>Container platform</td>
+        <td>Web server</td>
+        <td>Web server</td>
+      </tr>
+      <tr>
+        <td><strong>Main purpose</strong></td>
+        <td>Package apps in containers</td>
+        <td>Serve web content</td>
+        <td>Serve web content</td>
+      </tr>
+      <tr>
+        <td><strong>Performance</strong></td>
+        <td>Lightweight</td>
+        <td>Very fast</td>
+        <td>Good, but heavier</td>
+      </tr>
+      <tr>
+        <td><strong>Memory usage</strong></td>
+        <td>Low</td>
+        <td>Very low</td>
+        <td>Higher</td>
+      </tr>
+      <tr>
+        <td><strong>Configuration</strong></td>
+        <td>Dockerfile</td>
+        <td>nginx.conf</td>
+        <td>httpd.conf / .htaccess</td>
+      </tr>
+      <tr>
+        <td><strong>Best for</strong></td>
+        <td>Microservices, deployment</td>
+        <td>Static files, reverse proxy</td>
+        <td>PHP apps, legacy sites</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ========== SECTION 5: HOW THEY WORK TOGETHER ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🔗</span> How They Work Together
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🐳</div>
+        <div class="card-title">Docker</div>
+        <div class="card-desc">Packages your app + Nginx (or Apache) into one portable container.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🦈</div>
+        <div class="card-title">Nginx</div>
+        <div class="card-desc">Serves your files inside the Docker container. Fast and lightweight.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🦁</div>
+        <div class="card-title">Apache</div>
+        <div class="card-desc">Alternative web server inside Docker. Great for PHP/WordPress.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <strong>📝 They Work Like This:</strong>
+      1. You write a Dockerfile (recipe)
+      2. Docker builds an image
+      3. Docker runs a container from that image
+      4. Inside the container, Nginx (or Apache) serves your website
+      5. You access it at http://localhost:8080
+    </div>
+  </div>
+
+  <!-- ========== SECTION 6: QUICK QUIZ ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">📝</span> Quick Self-Quiz
+    </div>
+
+    <div style="background: #0a1a2a; border: 1px solid #ff00cc; border-radius: 12px; padding: 15px; margin-top: 15px;">
+      <div style="font-size: 0.7rem; color: #ffcc00;">Q1: What is a Docker image?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="revealAnswer(this, 'A blueprint/recipe for creating containers')">Show Answer</button>
+        <span class="quiz-answer">✅ A blueprint/recipe for creating containers</span>
+      </div>
+    </div>
+
+    <div style="background: #0a1a2a; border: 1px solid #ff00cc; border-radius: 12px; padding: 15px; margin-top: 15px;">
+      <div style="font-size: 0.7rem; color: #ffcc00;">Q2: What is Nginx best for?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="revealAnswer(this, 'Serving static files and reverse proxy')">Show Answer</button>
+        <span class="quiz-answer">✅ Serving static files and reverse proxy</span>
+      </div>
+    </div>
+
+    <div style="background: #0a1a2a; border: 1px solid #ff00cc; border-radius: 12px; padding: 15px; margin-top: 15px;">
+      <div style="font-size: 0.7rem; color: #ffcc00;">Q3: What command builds a Docker image?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="revealAnswer(this, 'docker build -t my-app .')">Show Answer</button>
+        <span class="quiz-answer">✅ docker build -t my-app .</span>
+      </div>
+    </div>
+
+    <div style="background: #0a1a2a; border: 1px solid #ff00cc; border-radius: 12px; padding: 15px; margin-top: 15px;">
+      <div style="font-size: 0.7rem; color: #ffcc00;">Q4: What is the main difference between Nginx and Apache?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="revealAnswer(this, 'Nginx is faster and lighter; Apache has more features and heavier')">Show Answer</button>
+        <span class="quiz-answer">✅ Nginx is faster and lighter; Apache has more features and heavier</span>
+      </div>
+    </div>
+
+    <div style="background: #0a1a2a; border: 1px solid #ff00cc; border-radius: 12px; padding: 15px; margin-top: 15px;">
+      <div style="font-size: 0.7rem; color: #ffcc00;">Q5: What is the command to start Nginx on Ubuntu?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="revealAnswer(this, 'sudo systemctl start nginx')">Show Answer</button>
+        <span class="quiz-answer">✅ sudo systemctl start nginx</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 7: QUICK REFERENCE ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">📋</span> Quick Reference Card
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🐳</div>
+        <div class="card-title">Docker Cheat Sheet</div>
+        <div class="card-desc">
+          <strong>Build:</strong> docker build -t name .<br>
+          <strong>Run:</strong> docker run -d -p 8080:80 name<br>
+          <strong>List:</strong> docker ps<br>
+          <strong>Stop:</strong> docker stop name<br>
+          <strong>Remove:</strong> docker rm name
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🦈</div>
+        <div class="card-title">Nginx Cheat Sheet</div>
+        <div class="card-desc">
+          <strong>Start:</strong> sudo systemctl start nginx<br>
+          <strong>Stop:</strong> sudo systemctl stop nginx<br>
+          <strong>Restart:</strong> sudo systemctl restart nginx<br>
+          <strong>Test:</strong> sudo nginx -t<br>
+          <strong>Reload:</strong> sudo nginx -s reload
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🦁</div>
+        <div class="card-title">Apache Cheat Sheet</div>
+        <div class="card-desc">
+          <strong>Start:</strong> sudo systemctl start apache2<br>
+          <strong>Stop:</strong> sudo systemctl stop apache2<br>
+          <strong>Restart:</strong> sudo systemctl restart apache2<br>
+          <strong>Test:</strong> sudo apache2ctl configtest<br>
+          <strong>Enable:</strong> sudo a2ensite site.conf
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SECTION 8: WHY THIS MATTERS ========== -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🎯</span> Why This Matters
+    </div>
+    <div style="font-size: 0.65rem; color: #88ddff; line-height: 1.6;">
+      <p>🔹 <strong>Docker</strong> = Run your apps anywhere, no "it works on my machine" problems</p>
+      <p>🔹 <strong>Nginx</strong> = Fast web server, great for serving files and handling many users</p>
+      <p>🔹 <strong>Apache</strong> = Reliable web server, great for PHP apps like WordPress</p>
+      <p>🔹 <strong>Together</strong> = Docker packages your app + Nginx (or Apache) into one portable box</p>
+      <p style="margin-top: 10px; color: #ffcc00;">🎮 <strong>Pro Tip:</strong> Nginx is the "speed" choice, Apache is the "features" choice. Both are awesome!</p>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <div class="footer">
+    <div class="glowing-line"></div>
+    <div>🐳 DOCKER • 🦈 NGINX • 🦁 APACHE — Simple Study Guide</div>
+    <div class="support-links">
+      <a href="https://github.com/zech12and8" target="_blank" class="support-link">🐙 GitHub</a>
+      <a href="https://poolersoccs.blogspot.com/" target="_blank" class="support-link">📝 IT Blog</a>
+      <a href="https://www.paypal.me/DPoolerJr" target="_blank" class="support-link">💛 PayPal</a>
+    </div>
+    <div style="font-size: 0.5rem; margin-top: 10px;">
+      ₿ BTC: 12Um8sPvrFE3hLQ4ERTiK3xtX4XmrcrLpv
+    </div>
+    <div class="blink" style="margin-top: 12px; font-size: 0.55rem;">▶ SYSTEM READY // PRESS START ◀</div>
+  </div>
+</div>
+
+<script>
+  function revealAnswer(btn, answer) {
+    const parent = btn.parentElement;
+    const answerSpan = parent.querySelector('.quiz-answer');
+    if (answerSpan) {
+      answerSpan.style.display = 'inline';
+      answerSpan.innerHTML = `✅ ${answer}`;
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+    }
+  }
+</script>
+
+</body>
+</html>
